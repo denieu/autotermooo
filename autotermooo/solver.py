@@ -1,5 +1,5 @@
 INVALID = 0
-WRONG_POSITION = 1
+UNPOSITIONED = 1
 CORRECT = 2
 
 
@@ -9,6 +9,11 @@ class TermoooSolver:
         self.letter_weight: dict[str, int] = {}
 
         self.game_rounds: list[tuple[str, list[int]]] = []
+
+        self.invalid_letters: list[str] = []
+        self.correct_letters: list = [None, None, None, None, None]
+        self.discovered_letters: list[str] = []
+        self.unpositioned_letters: list[list[str]] = [[], [], [], [], []]
 
         self.read_words(words_file)
         self.generate_letter_weight()
@@ -31,57 +36,46 @@ class TermoooSolver:
     def get_letter_weight(self, letter) -> int:
         return self.letter_weight[letter]
 
-    def get_word_weight_with_fewer_repeated_letters(self, word) -> int:
+    def get_word_weight(self, word, consider_duplicates=False) -> int:
         weight = 0
         letters = []
         for letter in list(word):
-            if letter in letters:
-                return 0
-            weight += self.get_letter_weight(letter)
+            if not (letter in letters and consider_duplicates):
+                weight += self.get_letter_weight(letter)
             letters += letter
         return weight
 
-    def get_word_weight(self, word) -> int:
-        weight = 0
-        for letter in list(word):
-            weight += self.get_letter_weight(letter)
-        return weight
-
-    @staticmethod
-    def filter_by_correct_letters(word, correct_letters):
-        for idx, letter in enumerate(correct_letters):
+    def filter_by_correct_letters(self, word):
+        for idx, letter in enumerate(self.correct_letters):
             if letter is not None:
                 if word[idx] != letter:
                     return False
         return True
 
-    @staticmethod
-    def filter_by_invalid_letters(word, invalid_letters):
-        for invalid_letter in invalid_letters:
+    def filter_by_invalid_letters(self, word):
+        for invalid_letter in self.invalid_letters:
             if invalid_letter in word:
                 return False
         return True
 
-    @staticmethod
-    def filter_by_discovered_letters(word, discovered_letters):
-        for discovered_letter in discovered_letters:
+    def filter_by_discovered_letters(self, word):
+        for discovered_letter in self.discovered_letters:
             if discovered_letter not in word:
                 return False
         return True
 
-    @staticmethod
-    def filter_by_wrong_position(word, wrong_position_letters):
-        for idx, position in enumerate(wrong_position_letters):
+    def filter_by_unpositioned(self, word):
+        for idx, position in enumerate(self.unpositioned_letters):
             for letter in position:
                 if word[idx] == letter:
                     return False
         return True
 
-    def choose_best_word_with_fewer_repeated_letters(self, words):
+    def choose_best_word(self, words, consider_duplicates=False):
         choosen_word = words[0]
-        max_weight = self.get_word_weight_with_fewer_repeated_letters(choosen_word)
+        max_weight = self.get_word_weight(choosen_word, consider_duplicates)
         for word in words[1:]:
-            new_weigth = self.get_word_weight_with_fewer_repeated_letters(word)
+            new_weigth = self.get_word_weight(word, consider_duplicates)
             if new_weigth > max_weight:
                 max_weight = new_weigth
                 choosen_word = word
@@ -89,23 +83,11 @@ class TermoooSolver:
         accuracy = round(1 / len(words) * 100, 2)
         return choosen_word, accuracy
 
-    def choose_best_word(self, words):
-        choosen_word = words[0]
-        max_weight = self.get_word_weight(choosen_word)
-        for word in words[1:]:
-            new_weigth = self.get_word_weight(word)
-            if new_weigth > max_weight:
-                max_weight = new_weigth
-                choosen_word = word
-
-        accuracy = round(1 / len(words) * 100, 2)
-        return choosen_word, accuracy
-
-    def choose_round_word(self, invalid, correct, discovered, wrong_position):
-        filtered_words = filter(lambda word: self.filter_by_invalid_letters(word, invalid), self.words)
-        filtered_words = filter(lambda word: self.filter_by_correct_letters(word, correct), filtered_words)
-        filtered_words = filter(lambda word: self.filter_by_discovered_letters(word, discovered), filtered_words)
-        filtered_words = filter(lambda word: self.filter_by_wrong_position(word, wrong_position), filtered_words)
+    def choose_round_word(self):
+        filtered_words = filter(self.filter_by_invalid_letters, self.words)
+        filtered_words = filter(self.filter_by_correct_letters, filtered_words)
+        filtered_words = filter(self.filter_by_discovered_letters, filtered_words)
+        filtered_words = filter(self.filter_by_unpositioned, filtered_words)
         filtered_words = list(filtered_words)
 
         if not filtered_words:
@@ -113,18 +95,13 @@ class TermoooSolver:
 
         choosen_word, accuracy = self.choose_best_word(filtered_words)
         if accuracy <= 5:
-            choosen_word, accuracy = self.choose_best_word_with_fewer_repeated_letters(filtered_words)
+            choosen_word, accuracy = self.choose_best_word(filtered_words, consider_duplicates=True)
         return choosen_word, accuracy, filtered_words
 
     def play_round(self):
         if not len(self.game_rounds):
-            choosen_word, accuracy = self.choose_best_word_with_fewer_repeated_letters(self.words)
+            choosen_word, accuracy = self.choose_best_word(self.words, consider_duplicates=True)
             return choosen_word, accuracy, self.words
-
-        invalid_letters = []
-        correct_letters = [None, None, None, None, None]
-        discovered_letters = []
-        wrong_position_letters = [[], [], [], [], []]
 
         for letters, letters_status in self.game_rounds:
             letters = list(letters)
@@ -133,23 +110,21 @@ class TermoooSolver:
                 letter = letters[idx]
 
                 if letter_status == INVALID:
-                    if letter not in invalid_letters:
-                        invalid_letters.append(letter)
-                elif letter_status == WRONG_POSITION:
-                    if letter in invalid_letters:
+                    if letter not in self.invalid_letters:
+                        self.invalid_letters.append(letter)
+                elif letter_status == UNPOSITIONED:
+                    if letter in self.invalid_letters:
                         raise Exception(f"The letter {letter},"
-                                        f" was defined as WRONG POSITION but it had already been defined as INVALID")
-                    wrong_position_letters[idx] += letter
-                    if letter not in discovered_letters:
-                        discovered_letters.append(letter)
+                                        f" was defined as UNPOSITIONED but it had already been defined as INVALID")
+                    self.unpositioned_letters[idx] += letter
+                    if letter not in self.discovered_letters:
+                        self.discovered_letters.append(letter)
                 elif letter_status == CORRECT:
-                    correct_letters[idx] = letter
-                    if letter not in discovered_letters:
-                        discovered_letters.append(letter)
+                    self.correct_letters[idx] = letter
+                    if letter not in self.discovered_letters:
+                        self.discovered_letters.append(letter)
                 else:
                     raise Exception(f"Invalid letter {letter} status, round {''.join(letters)}")
 
-        choice, accuracy, options = self.choose_round_word(invalid_letters, correct_letters,
-                                                           discovered_letters, wrong_position_letters)
+        choice, accuracy, options = self.choose_round_word()
         return choice, accuracy, options
-
