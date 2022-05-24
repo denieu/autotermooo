@@ -1,4 +1,4 @@
-from autotermooo.solver import TermoooSolver
+from autotermooo.solver import TermoooSolver, INVALID, UNPOSITIONED, CORRECT
 
 
 class AutoTermooo:
@@ -15,6 +15,20 @@ class AutoTermooo:
                 return False
             else:
                 print("Invalid response")
+
+    @staticmethod
+    def solve_status(word, status):
+        word = list(word)
+        for idx, letter_status in enumerate(status):
+            if letter_status not in [UNPOSITIONED, CORRECT]:
+                continue
+
+            for recursive_idx, recursive_letter_status in enumerate(status):
+                if idx != recursive_idx and word[idx] == word[recursive_idx]:
+                    if recursive_letter_status == INVALID:
+                        status[recursive_idx] = UNPOSITIONED
+                        print(f"Solving letter {word[idx]} status, from INVALID to UNPOSITIONED")
+        return status
 
     def play_game(self):
         while True:
@@ -39,4 +53,5 @@ class AutoTermooo:
                 break
 
             status = [int(letter_status) for letter_status in list(status)]
+            status = self.solve_status(choosen_word, status)
             self.solver.game_rounds.append((choosen_word, status))

@@ -131,5 +131,4 @@ class TermoooSolver:
                 else:
                     raise Exception(f"Invalid letter {letter} status, round {''.join(letters)}")
 
-        choice, accuracy, options = self.choose_round_word()
-        return choice, accuracy, options
+        return self.choose_round_word()
