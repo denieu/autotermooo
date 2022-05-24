@@ -6,7 +6,7 @@ class AutoTermooo:
         self.solver = TermoooSolver("game_words/pt_br.txt")
 
     @staticmethod
-    def yes_or_not_input():
+    def yes_or_not_input() -> bool:
         while True:
             user_input = input("").lower()
             if user_input == "y":
@@ -17,7 +17,7 @@ class AutoTermooo:
                 print("Invalid response")
 
     @staticmethod
-    def solve_status(word, status):
+    def solve_status(word: str, status: list[int]) -> list[int]:
         word = list(word)
         for idx, letter_status in enumerate(status):
             if letter_status not in [UNPOSITIONED, CORRECT]:
@@ -30,7 +30,7 @@ class AutoTermooo:
                         print(f"Solving letter {word[idx]} status, from INVALID to UNPOSITIONED")
         return status
 
-    def play_game(self):
+    def play_game(self) -> None:
         while True:
             suggested_word, accuracy, good_options = self.solver.play_round()
             print(f"The suggested word is '{suggested_word}' with {accuracy}% accuracy")

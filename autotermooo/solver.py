@@ -1,3 +1,9 @@
+"""
+Solver
+======
+
+Class to solve termoo game.
+"""
 INVALID = 0
 UNPOSITIONED = 1
 CORRECT = 2
@@ -18,11 +24,11 @@ class TermoooSolver:
         self.read_words(words_file)
         self.generate_letter_weight()
 
-    def read_words(self, words_file: str):
+    def read_words(self, words_file: str) -> None:
         with open(words_file) as words_fp:
             self.words = words_fp.read().splitlines()
 
-    def generate_letter_weight(self):
+    def generate_letter_weight(self) -> None:
         for word in self.words:
             for letter in list(word):
                 if letter not in self.letter_weight:
@@ -33,10 +39,10 @@ class TermoooSolver:
         for idx, letter in enumerate(sorted_letters):
             self.letter_weight[letter[0]] = idx + 1
 
-    def get_letter_weight(self, letter) -> int:
+    def get_letter_weight(self, letter: str) -> int:
         return self.letter_weight[letter]
 
-    def get_word_weight(self, word, consider_duplicates=True, variation_multiplier=False) -> int:
+    def get_word_weight(self, word: str, consider_duplicates: bool = True, variation_multiplier: bool = False) -> int:
         weight = 0
         letters = []
         for letter in list(word):
@@ -48,33 +54,34 @@ class TermoooSolver:
             weight *= len(letters)
         return weight
 
-    def filter_by_correct_letters(self, word):
+    def filter_by_correct_letters(self, word: str) -> bool:
         for idx, letter in enumerate(self.correct_letters):
             if letter is not None:
                 if word[idx] != letter:
                     return False
         return True
 
-    def filter_by_invalid_letters(self, word):
+    def filter_by_invalid_letters(self, word: str) -> bool:
         for invalid_letter in self.invalid_letters:
             if invalid_letter in word:
                 return False
         return True
 
-    def filter_by_discovered_letters(self, word):
+    def filter_by_discovered_letters(self, word: str) -> bool:
         for discovered_letter in self.discovered_letters:
             if discovered_letter not in word:
                 return False
         return True
 
-    def filter_by_unpositioned(self, word):
+    def filter_by_unpositioned(self, word: str) -> bool:
         for idx, position in enumerate(self.unpositioned_letters):
             for letter in position:
                 if word[idx] == letter:
                     return False
         return True
 
-    def choose_best_word(self, words, consider_duplicates=True, variation_multiplier=False):
+    def choose_best_word(self, words: list[str],
+                         consider_duplicates: bool = True, variation_multiplier: bool = False) -> (str, float):
         choosen_word = words[0]
         max_weight = self.get_word_weight(choosen_word, consider_duplicates, variation_multiplier)
         for word in words[1:]:
@@ -86,7 +93,7 @@ class TermoooSolver:
         accuracy = round(1 / len(words) * 100, 2)
         return choosen_word, accuracy
 
-    def choose_round_word(self):
+    def choose_round_word(self) -> (str, float, list[str]):
         filtered_words = filter(self.filter_by_invalid_letters, self.words)
         filtered_words = filter(self.filter_by_correct_letters, filtered_words)
         filtered_words = filter(self.filter_by_discovered_letters, filtered_words)
@@ -102,7 +109,7 @@ class TermoooSolver:
                                                            consider_duplicates=False, variation_multiplier=True)
         return choosen_word, accuracy, filtered_words
 
-    def play_round(self):
+    def play_round(self) -> (str, float, list[str]):
         if not len(self.game_rounds):
             choosen_word, accuracy = self.choose_best_word(self.words,
                                                            consider_duplicates=False, variation_multiplier=True)
