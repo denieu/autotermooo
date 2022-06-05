@@ -1258,7 +1258,6 @@ comer
 comes
 comeu
 comia
-compo
 comum
 conde
 cones
@@ -3463,7 +3462,6 @@ opine
 opino
 opoem
 opoes
-opomo
 opora
 optai
 optam
@@ -3974,6 +3972,7 @@ quedo
 quepe
 quere
 quero
+quibe
 quica
 quilo
 quina
