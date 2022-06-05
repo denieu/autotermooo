@@ -33,6 +33,7 @@ class AutoTermooo:
     def play_game(self) -> None:
         while True:
             suggested_word, accuracy, good_options = self.solver.play_round()
+            print(f"All options: {good_options}")
             print(f"The suggested word is '{suggested_word}' with {accuracy}% accuracy")
 
             print(f"Do you accept the suggestion '{suggested_word}'? Yes(Y) or No(N)")
@@ -40,11 +41,6 @@ class AutoTermooo:
             if sugestion_accepted:
                 choosen_word = suggested_word
             else:
-                print("Want to see other good options? Yes(Y) or No(N)")
-                show_options = self.yes_or_not_input()
-                if show_options:
-                    print(f"All options: {good_options}")
-
                 choosen_word = input("Type the chosen word: ").lower()
 
             status = input("Enter what is left on your screen, 0 for INVALID, 1 for UNPOSITIONED or 2 for CORRECT"
