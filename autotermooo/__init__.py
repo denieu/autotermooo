@@ -34,17 +34,14 @@ class AutoTermooo:
         while True:
             suggested_word, accuracy, good_options = self.solver.play_round()
             print(f"All options: {good_options}")
-            print(f"The suggested word is '{suggested_word}' with {accuracy}% accuracy")
+            print(f"Accuracy: {accuracy}%")
+            print(f"Suggested word: {suggested_word}")
 
             print(f"Do you accept the suggestion '{suggested_word}'? Yes(Y) or No(N)")
             sugestion_accepted = self.yes_or_not_input()
-            if sugestion_accepted:
-                choosen_word = suggested_word
-            else:
-                choosen_word = input("Type the chosen word: ").lower()
+            choosen_word = suggested_word if sugestion_accepted else input("Type the chosen word: ").lower()
 
-            status = input("Enter what is left on your screen, 0 for INVALID, 1 for UNPOSITIONED or 2 for CORRECT"
-                           "(No space or enter between characters): ")
+            status = input("Enter the result, 0 for INVALID, 1 for UNPOSITIONED or 2 for CORRECT: ")
             if status == "22222":
                 break
 
