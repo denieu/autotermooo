@@ -4,6 +4,7 @@ Solver
 
 Class to solve termoo game.
 """
+from autotermooo.filter import WordFilter
 INVALID = 0
 UNPOSITIONED = 1
 CORRECT = 2
@@ -62,32 +63,6 @@ class TermoooSolver:
             weight *= len(letters)
         return weight
 
-    def filter_by_correct_letters(self, word: str) -> bool:
-        for idx, letter in enumerate(self.correct_letters):
-            if letter is not None:
-                if word[idx] != letter:
-                    return False
-        return True
-
-    def filter_by_invalid_letters(self, word: str) -> bool:
-        for invalid_letter in self.invalid_letters:
-            if invalid_letter in word:
-                return False
-        return True
-
-    def filter_by_discovered_letters(self, word: str) -> bool:
-        for discovered_letter in self.discovered_letters:
-            if discovered_letter not in word:
-                return False
-        return True
-
-    def filter_by_unpositioned(self, word: str) -> bool:
-        for idx, position in enumerate(self.unpositioned_letters):
-            for letter in position:
-                if word[idx] == letter:
-                    return False
-        return True
-
     def choose_best_word(self, words: list[str],
                          discover_new_letters: bool = False,
                          consider_duplicates: bool = True, variation_multiplier: bool = False) -> (str, float):
@@ -103,11 +78,12 @@ class TermoooSolver:
         return choosen_word, accuracy
 
     def choose_round_word(self) -> (str, float, list[str]):
-        filtered_words = filter(self.filter_by_invalid_letters, self.words)
-        filtered_words = filter(self.filter_by_correct_letters, filtered_words)
-        filtered_words = filter(self.filter_by_discovered_letters, filtered_words)
-        filtered_words = filter(self.filter_by_unpositioned, filtered_words)
-        filtered_words = list(filtered_words)
+        word_filter = WordFilter(self.words)
+        word_filter.by_invalid_letters(self.invalid_letters)
+        word_filter.by_correct_letters(self.correct_letters)
+        word_filter.by_discovered_letters(self.discovered_letters)
+        word_filter.by_unpositioned_letters(self.unpositioned_letters)
+        filtered_words = word_filter.get_filtered()
 
         if not filtered_words:
             raise Exception("Word not found")
