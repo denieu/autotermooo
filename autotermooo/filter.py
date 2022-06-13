@@ -6,7 +6,7 @@ Class to filter words.
 """
 
 
-class WordFilter:
+class WordsFilter:
     def __init__(self, words: list[str]):
         self.words = words
 
@@ -14,9 +14,8 @@ class WordFilter:
         """Remove words that don't have the correct letters in the correct positions"""
         new_words = []
         for word in self.words:
-            for idx, letter in enumerate(correct_letters):
-                if letter is not None and word[idx] != letter:
-                    new_words.append(word)
+            if all(letter is None or word[idx] == letter for idx, letter in enumerate(correct_letters)):
+                new_words.append(word)
         self.words = new_words
 
     def by_invalid_letters(self, invalid_letters: list[str]) -> None:
@@ -31,10 +30,8 @@ class WordFilter:
         """Remove words that have unpositioned letters"""
         new_words = []
         for word in self.words:
-            for idx, position in enumerate(unpositioned_letters):
-                for letter in position:
-                    if word[idx] == letter:
-                        new_words.append(word)
+            if all(all(word[idx] != letter for letter in letters) for idx, letters in enumerate(unpositioned_letters)):
+                new_words.append(word)
         self.words = new_words
 
     def get_filtered(self) -> list[str]:
