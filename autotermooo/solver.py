@@ -42,12 +42,20 @@ class TermoooSolver:
     def get_letter_weight(self, letter: str) -> int:
         return self.letter_weight[letter]
 
-    def get_word_weight(self, word: str, consider_duplicates: bool = True, variation_multiplier: bool = False) -> int:
+    def get_word_weight(self, word: str, discover_new_letters: bool = False, consider_duplicates: bool = True, variation_multiplier: bool = False) -> int:
         weight = 0
         letters = []
-        for letter in list(word):
+        for idx, letter in enumerate(list(word)):
             if letter not in letters or consider_duplicates:
-                weight += self.get_letter_weight(letter)
+                letter_weitgth = self.get_letter_weight(letter)
+                if discover_new_letters:
+                    if letter in self.discovered_letters:
+                        letter_weitgth *= -1
+                    elif letter in self.invalid_letters:
+                        letter_weitgth *= -10
+                    elif letter in self.unpositioned_letters[idx]:
+                        letter_weitgth *= -100
+                weight += letter_weitgth
             if letter not in letters:
                 letters += letter
         if variation_multiplier:
@@ -81,11 +89,12 @@ class TermoooSolver:
         return True
 
     def choose_best_word(self, words: list[str],
+                         discover_new_letters: bool = False,
                          consider_duplicates: bool = True, variation_multiplier: bool = False) -> (str, float):
         choosen_word = words[0]
-        max_weight = self.get_word_weight(choosen_word, consider_duplicates, variation_multiplier)
+        max_weight = self.get_word_weight(choosen_word, discover_new_letters, consider_duplicates, variation_multiplier)
         for word in words[1:]:
-            new_weigth = self.get_word_weight(word, consider_duplicates, variation_multiplier)
+            new_weigth = self.get_word_weight(word, discover_new_letters, consider_duplicates, variation_multiplier)
             if new_weigth > max_weight:
                 max_weight = new_weigth
                 choosen_word = word
@@ -105,13 +114,16 @@ class TermoooSolver:
 
         choosen_word, accuracy = self.choose_best_word(filtered_words)
         if accuracy <= 5:
-            choosen_word, accuracy = self.choose_best_word(filtered_words,
+            choosen_word, accuracy = self.choose_best_word(self.words,
+                                                           discover_new_letters=True,
                                                            consider_duplicates=False, variation_multiplier=True)
+            accuracy = 0
         return choosen_word, accuracy, filtered_words
 
     def play_round(self) -> (str, float, list[str]):
         if not len(self.game_rounds):
             choosen_word, accuracy = self.choose_best_word(self.words,
+                                                           discover_new_letters=True,
                                                            consider_duplicates=False, variation_multiplier=True)
             return choosen_word, accuracy, self.words
 
