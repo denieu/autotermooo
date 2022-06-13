@@ -34,29 +34,18 @@ class TermoooSolver:
     def choose_best_word(self, words: list[str],
                          discover_new_letters: bool = False,
                          consider_duplicates: bool = True, variation_multiplier: bool = False) -> (str, float):
+        self.weigher.set_state(self.invalid_letters, self.correct_letters,
+                               self.discovered_letters, self.unpositioned_letters)
+        self.weigher.set_multipliers(invalid_multiplier=-10 if discover_new_letters else 1,
+                                     correct_multiplier=1 if discover_new_letters else 1,
+                                     discovered_multiplier=-1 if discover_new_letters else 1,
+                                     unpositioned_multiplier=-100 if discover_new_letters else 1)
+
         choosen_word = words[0]
-        max_weight = self.weigher.get_word_weight(
-            choosen_word,
-            self.invalid_letters, self.correct_letters, self.discovered_letters, self.unpositioned_letters,
-            invalid_multiplier=-10 if discover_new_letters else 1,
-            correct_multiplier=1 if discover_new_letters else 1,
-            discovered_multiplier=-1 if discover_new_letters else 1,
-            unpositioned_multiplier=-100 if discover_new_letters else 1,
-            consider_duplicates=consider_duplicates,
-            variation_multiplier=variation_multiplier
-        )
+        max_weight = self.weigher.get_word_weight(choosen_word, consider_duplicates, variation_multiplier)
 
         for word in words[1:]:
-            new_weigth = self.weigher.get_word_weight(
-                word,
-                self.invalid_letters, self.correct_letters, self.discovered_letters, self.unpositioned_letters,
-                invalid_multiplier=-10 if discover_new_letters else 1,
-                correct_multiplier=1 if discover_new_letters else 1,
-                discovered_multiplier=-1 if discover_new_letters else 1,
-                unpositioned_multiplier=-100 if discover_new_letters else 1,
-                consider_duplicates=consider_duplicates,
-                variation_multiplier=variation_multiplier
-            )
+            new_weigth = self.weigher.get_word_weight(word, consider_duplicates, variation_multiplier)
             if new_weigth > max_weight:
                 max_weight = new_weigth
                 choosen_word = word
