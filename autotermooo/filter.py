@@ -30,7 +30,8 @@ class WordsFilter:
         """Remove words that have unpositioned letters"""
         new_words = []
         for word in self.words:
-            if all(all(word[idx] != letter for letter in letters) for idx, letters in enumerate(unpositioned_letters)):
+            if all(all(word[idx] != letter for letter in letters)
+                   for idx, letters in enumerate(unpositioned_letters) if letters):
                 new_words.append(word)
         self.words = new_words
 

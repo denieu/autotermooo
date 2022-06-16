@@ -70,15 +70,12 @@ class WordsWeigher:
         self.discovered_multiplier = discovered_multiplier
         self.unpositioned_multiplier = unpositioned_multiplier
 
-    def get_word_weight(self,
-                        word: str,
-                        consider_duplicates: bool = True,
-                        variation_multiplier: bool = False) -> int:
+    def get_word_weight(self, word: str, variation_multiplier: bool = False) -> int:
         """Returns the weight of a word"""
         weight = 0
         letters = []
         for idx, letter in enumerate(list(word)):
-            if letter not in letters or consider_duplicates:
+            if letter not in letters:
                 weight += self.get_letter_weight(letter, idx)
             if letter not in letters:
                 letters.append(letter)

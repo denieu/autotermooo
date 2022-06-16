@@ -31,9 +31,7 @@ class TermoooSolver:
         with open(words_file) as words_fp:
             self.words = words_fp.read().splitlines()
 
-    def choose_best_word(self, words: list[str],
-                         discover_new_letters: bool = False,
-                         consider_duplicates: bool = True, variation_multiplier: bool = False) -> (str, float):
+    def choose_best_word(self, words: list[str], discover_new_letters: bool = False) -> (str, float):
         self.weigher.set_state(self.invalid_letters, self.correct_letters,
                                self.discovered_letters, self.unpositioned_letters)
         self.weigher.set_multipliers(invalid_multiplier=-10 if discover_new_letters else 1,
@@ -42,10 +40,10 @@ class TermoooSolver:
                                      unpositioned_multiplier=-100 if discover_new_letters else 1)
 
         choosen_word = words[0]
-        max_weight = self.weigher.get_word_weight(choosen_word, consider_duplicates, variation_multiplier)
+        max_weight = self.weigher.get_word_weight(choosen_word, discover_new_letters)
 
         for word in words[1:]:
-            new_weigth = self.weigher.get_word_weight(word, consider_duplicates, variation_multiplier)
+            new_weigth = self.weigher.get_word_weight(word, discover_new_letters)
             if new_weigth > max_weight:
                 max_weight = new_weigth
                 choosen_word = word
@@ -65,18 +63,16 @@ class TermoooSolver:
             raise Exception("Word not found")
 
         choosen_word, accuracy = self.choose_best_word(filtered_words)
-        if accuracy <= 5:
-            choosen_word, accuracy = self.choose_best_word(self.words,
-                                                           discover_new_letters=True,
-                                                           consider_duplicates=False, variation_multiplier=True)
-            accuracy = 0
+        # if accuracy <= 5:
+        #     choosen_word, accuracy = self.choose_best_word(self.words,
+        #                                                    discover_new_letters=True,
+        #                                                    consider_duplicates=False, variation_multiplier=True)
+        #     accuracy = 0
         return choosen_word, accuracy, filtered_words
 
     def play_round(self) -> (str, float, list[str]):
         if not len(self.game_rounds):
-            choosen_word, accuracy = self.choose_best_word(self.words,
-                                                           discover_new_letters=True,
-                                                           consider_duplicates=False, variation_multiplier=True)
+            choosen_word, accuracy = self.choose_best_word(self.words, discover_new_letters=True)
             return choosen_word, accuracy, self.words
 
         for letters, letters_status in self.game_rounds:
