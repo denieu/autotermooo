@@ -75,8 +75,7 @@ class WordsWeigher:
         weight = 0
         letters = []
         for idx, letter in enumerate(list(word)):
-            if letter not in letters:
-                weight += self.get_letter_weight(letter, idx)
+            weight += self.get_letter_weight(letter, idx)
             if letter not in letters:
                 letters.append(letter)
         if variation_multiplier:
