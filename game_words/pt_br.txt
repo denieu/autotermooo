@@ -2985,8 +2985,6 @@ marco
 mares
 maria
 maria
-mario
-mario
 marra
 marta
 marta
@@ -4656,7 +4654,6 @@ subir
 subis
 subiu
 sucos
-sudao
 sueca
 sueco
 sueis
