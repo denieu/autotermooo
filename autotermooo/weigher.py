@@ -30,7 +30,7 @@ class WordsWeigher:
                 if letter not in self.letter_weight:
                     self.letter_weight[letter] = 0
                 self.letter_weight[letter] += 1
-                
+
         sorted_letters = sorted(self.letter_weight.items(), key=lambda x: x[1])
         for idx, letter in enumerate(sorted_letters):
             self.letter_weight[letter[0]] = idx + 1
@@ -48,27 +48,20 @@ class WordsWeigher:
             letter_weitgth *= self.unpositioned_multiplier
         return letter_weitgth
 
-    def set_state(self,
-                  invalid_letters: list[str],
-                  correct_letters: list,
-                  discovered_letters: list[str],
-                  unpositioned_letters: list[list[str]]) -> None:
+    def set_state(self, invalid: list[str], correct: list, discovered: list[str],
+                  unpositioned: list[list[str]]) -> None:
         """Sets the state of the weigher"""
-        self.invalid_letters = invalid_letters
-        self.correct_letters = correct_letters
-        self.discovered_letters = discovered_letters
-        self.unpositioned_letters = unpositioned_letters
+        self.invalid_letters = invalid
+        self.correct_letters = correct
+        self.discovered_letters = discovered
+        self.unpositioned_letters = unpositioned
 
-    def set_multipliers(self,
-                        invalid_multiplier: int = 1,
-                        correct_multiplier: int = 1,
-                        discovered_multiplier: int = 1,
-                        unpositioned_multiplier: int = 1) -> None:
+    def set_multipliers(self, invalid: int = 1, correct: int = 1, discovered: int = 1, unpositioned: int = 1) -> None:
         """Sets the multipliers of the weigher"""
-        self.invalid_multiplier = invalid_multiplier
-        self.correct_multiplier = correct_multiplier
-        self.discovered_multiplier = discovered_multiplier
-        self.unpositioned_multiplier = unpositioned_multiplier
+        self.invalid_multiplier = invalid
+        self.correct_multiplier = correct
+        self.discovered_multiplier = discovered
+        self.unpositioned_multiplier = unpositioned
 
     def get_word_weight(self, word: str, variation_multiplier: bool = False) -> int:
         """Returns the weight of a word"""
