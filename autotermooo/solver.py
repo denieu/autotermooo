@@ -54,6 +54,8 @@ class TermoooSolver:
 
         new_invalid = self.invalid_letters + [letter for letter in self.correct_letters if letter]
         new_correct = [None, None, None, None, None]
+
+        self.weigher = WordsWeigher(filtered_words)
         self.weigher.set_state(new_invalid, new_correct, self.discovered_letters, self.unpositioned_letters)
         self.weigher.set_multipliers(invalid=-100, correct=1, discovered=-100, unpositioned=-10)
 
@@ -70,6 +72,7 @@ class TermoooSolver:
         if not filtered_words:
             raise Exception("Word not found")
 
+        self.weigher = WordsWeigher(filtered_words)
         self.weigher.set_state(
             self.invalid_letters, self.correct_letters, self.discovered_letters, self.unpositioned_letters)
         self.weigher.set_multipliers(invalid=1, correct=1, discovered=1, unpositioned=1)
